@@ -1,0 +1,25 @@
+PHP Function to validate Sri Lankan NIC number for given nic String
+Posted on May 5, 2013 by udara86	• Posted in PHP Functions for your Usage	• Leave a comment
+//Validate NIC
+
+function is_valid_nic($nic){
+$result = true;
+if($nic !=””){
+if(strlen($nic) <> 10){
+$result = FALSE;
+}
+
+$nic_9 = substr($nic,0,9);
+
+if (!is_numeric ($nic_9)){
+$result =false;
+}
+
+$nic_v = substr($nic,9,1);
+if (is_numeric ($nic_v)){
+$result =false;
+}
+}
+return $result;
+
+}

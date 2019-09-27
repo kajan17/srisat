@@ -1,0 +1,165 @@
+<?php
+
+include("database/db_conection.php");
+
+if(isset($_POST['login']))
+{
+    //$user_email=$_POST['email'];
+    //$user_pass=$_POST['pass'];
+
+    $user_email = mysqli_real_escape_string($dbcon, $_POST['email']);
+    $user_pass = mysqli_real_escape_string($dbcon, $_POST['pass']);
+
+    $check_user="select * from user,customer WHERE user.username='$user_email'AND user.password='$user_pass' AND user.usertype='Customer' AND user.adminapproval='1' AND customer.mobileconfirmation='2'";
+    $check_user1="select * from user WHERE username='$user_email'AND password='$user_pass' AND adminapproval='0'";
+    $check_user2="select * from user WHERE username='$user_email'AND password='$user_pass' AND adminapproval='1' AND usertype='Technician'";
+    $check_user21="select * from user WHERE username='$user_email'AND password='$user_pass' AND adminapproval='2' AND usertype='Technician'";
+    $check_user3="select * from user WHERE username='$user_email'AND password='$user_pass' AND adminapproval='1' AND usertype='adminmanagement'";
+    $check_user4="select * from user WHERE username='$user_email'AND password='$user_pass' AND adminapproval='1' AND usertype='adminfunction'";
+    $check_user5="select * from user,customer WHERE user.username='$user_email' AND user.password='$user_pass' AND customer.mobileconfirmation='1'";
+    $run=mysqli_query($dbcon,$check_user);
+    $run1=mysqli_query($dbcon,$check_user1);
+    $run2=mysqli_query($dbcon,$check_user2);
+    $run21=mysqli_query($dbcon,$check_user21);
+    $run3=mysqli_query($dbcon,$check_user3);
+    $run4=mysqli_query($dbcon,$check_user4);
+    $run5=mysqli_query($dbcon,$check_user5);
+    if(mysqli_num_rows($run))
+    {
+      session_start();
+         $_SESSION['login']=$user_email;
+         $view_users_query="select * from customer,carduser WHERE customer.customerID=carduser.customerID";//select query for viewing users.
+        $run=mysqli_query($dbcon,$view_users_query);//here run the sql query.
+   $row=mysqli_fetch_array($run);
+          $_SESSION['user']=$row['fullname'];
+          $_SESSION['user_phone']=$row['contactno'];
+          $_SESSION['customerID']=$row['customerID'];
+          $_SESSION['cardnumber']=$row['cardnumber'];
+
+        echo "<script>window.open('index.php','_self')</script>";
+
+       
+
+    }
+    else if(mysqli_num_rows($run1))
+    {
+       session_start();
+        $_SESSION['approval']="WAIT FOR ADMIN'S APPROVAL";
+            echo "<script>window.open('index.php','_self')</script>";
+    }
+    else if(mysqli_num_rows($run2))
+    {
+       session_start();
+         $_SESSION['login']=$user_email;
+        echo "<script>window.open('technician/index.php','_self')</script>";
+    }
+    else if(mysqli_num_rows($run21))
+    {
+       session_start();
+         $_SESSION['login']=$user_email;
+        echo "<script>window.open('technician/reset-password.php','_self')</script>";
+    }
+     else if(mysqli_num_rows($run3)){
+
+            session_start();
+         $_SESSION['adminm']=$user_email;
+        echo "<script>window.open('adminff/index.php','_self')</script>";
+         }
+         else if(mysqli_num_rows($run4)){
+
+            session_start();
+         $_SESSION['adminf']=$user_email;
+        echo "<script>window.open('admin/index.php','_self')</script>";
+         }
+         else if(mysqli_num_rows($run5)){
+
+         echo "<script>alert('kkkkkkkkkkkkkkkkkkk')</script>";
+          //$_SESSION['customerID']=$row['customerID'];
+        //echo "<script>window.open('newusermobilnumbercheck.php?id=".$customer_ID."','_self')</script>";
+         }
+        else{
+             echo "<script>alert('Wrong Username Or Password')</script>";
+             echo "<script>window.open('index.php','_self')</script>";
+
+        }
+      }?>
+
+
+
+
+
+
+      $sql ="SELECT * FROM customer WHERE customerID='$customerid'";
+ $run_query=mysqli_query($dbcon,$sql);
+ $row=mysqli_fetch_array($run_query);
+    $mobilenocode=$row['mobilenocode'];
+if($codeno==$mobilenocode)
+{ 
+  $sql1 = "UPDATE customer SET mobileconfirmation = '2' WHERE customerID ='$customerid'";
+              if(mysqli_query($dbcon, $sql1)){
+                session_start();
+                $_SESSION['waitname']=$row['fullname'];
+                $_SESSION['waitaproval']="Wait For Admin Approval";
+              echo "<script>window.open('index.php',)</script>";
+         
+              }else{
+                session_start();
+                  $_SESSION['codeerror']="Your code number is missmatching please enter correct";
+             echo "<script>window.open('newusermobilnumbercheck.php?id=".$customerid."','_self')</script>";
+               
+              } 
+
+
+}
+
+
+
+<?php
+
+include("database/db_conection.php");//make connection here
+if(isset($_POST['update']))
+{
+    $username=$_POST['email'];
+    $full_name=$_POST['fname']; //strlen($name);
+    $ds_division=$_POST['dsdivision'];
+    $gs_division=$_POST['gsdivision'];
+    $vcnum=$_POST['vcno'];
+    $vendor=$_POST['vendor'];
+    $address=$_POST['address'];
+    $contactno=$_POST['contact'];
+    $status='1';
+
+
+
+
+
+//insert the user into the database.
+ //$insert_user="INSERT INTO user(customerID,cardnumber,vender,status) VALUES('$customer_id','$vcnum','$vendor','$status')";
+ 
+
+$insert_user="INSERT INTO customer(username,fullname,area,gsdivision,address,contactno) VALUES('$username','$full_name','$ds_division','$gs_division','$address','$contactno')";
+mysqli_query($dbcon,$insert_user);
+ $cus_ID="SELECT * FROM customer WHERE username='$username'";//select query for viewing users.
+        $run=mysqli_query($dbcon,$cus_ID);//here run the sql query.
+   $row=mysqli_fetch_array($run);
+    $customer_ID=$row[0];
+
+$insert_card="INSERT INTO carduser(customerID,cardnumber,vender) VALUES('$customer_ID','$vcnum','$vendor')";
+mysqli_query($dbcon,$insert_card);
+
+       // $_SESSION['login']=$user_email;
+        //echo "<script>window.open('adminapprovalwaitmessage.php','_self')</script>";
+ //$_SESSION['email']=$user_email;
+if(mysqli_query($dbcon,$insert_card))
+        {
+            $_SESSION['approval']="WAIT FOR ADMIN APPROVAL";
+            echo "<script>window.open('index.php','_self')</script>";
+
+                        }
+
+
+else{
+    echo "not inserted";
+}
+}
+ ?>
